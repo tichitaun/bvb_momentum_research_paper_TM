@@ -1,0 +1,13 @@
+# data (not redistributed: download with download_pool.py / markets_download.py)
+*_historical_data.csv
+Bucharest_Total_Return_Historical_Data.xlsx
+markets/data/
+
+# outputs (recreated by run_all.py)
+*.xlsx
+*.png
+run_all_log.txt
+
+# Python
+__pycache__/
+*.pyc
