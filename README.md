@@ -12,15 +12,35 @@ with one command.
   after trading costs, with similar risk.
 - The same tests in **Greece, Poland and Germany** find no such effect: Romania is an exception.
 
-## Setup
+## Quick start
 
-```
-pip install -r requirements.txt
-```
+From an empty folder containing these scripts:
+
+1. **Install the packages**
+   ```
+   pip install -r requirements.txt
+   ```
+2. **Download the 32 stocks from Yahoo Finance**
+   ```
+   python download_pool.py
+   ```
+3. **Download BET-TR by hand** from Investing.com (BET Total Return, daily, January 2015 to
+   December 2025) and save it in the same folder as
+   `Bucharest_Total_Return_Historical_Data.xlsx`, with columns `Date` and `Price`.
+   (BET-TR is not available on Yahoo Finance.)
+4. **Run the whole analysis**
+   ```
+   python sensitivity.py
+   python loser_characteristics.py
+   python run_all.py
+   ```
+   All 8 automatic checks must PASS. The full output is saved to `run_all_log.txt`.
+
+Steps 2 and 3 are only needed once. To reproduce the paper's numbers exactly, use the same
+data files: `data_manifest.csv` lists their dates and SHA-256 hashes. Yahoo Finance revises
+its adjusted prices over time, so a new download may give slightly different results.
 
 ## Data
-
-The data are not included in this repository (licensing). To rebuild them:
 
 | Input | Source | How |
 |---|---|---|
@@ -29,17 +49,10 @@ The data are not included in this repository (licensing). To rebuild them:
 | Risk-free rate | National Bank of Romania policy rate | in `common.py` (`BNR_CHANGES`) |
 | Dividend corrections | company filings, BVB, Central Depository | in `common.py` (`CORRECTIONS`) |
 
-`data_manifest.csv` lists the exact files used for the paper (rows, dates and a SHA-256
-hash of each file); `environment.txt` lists the package versions. Yahoo Finance revises its
-adjusted prices over time, so a new download may differ slightly.
+The data are not included in this repository (licensing). `environment.txt` lists the
+package versions used for the paper.
 
-## Run everything
-
-Put all scripts, the 32 CSV files and the BET-TR file in one folder, then:
-
-```
-python run_all.py
-```
+## What `run_all.py` does
 
 | Step | Script | Produces (paper) |
 |---|---|---|
@@ -56,7 +69,9 @@ python run_all.py
 | 11 | `costs.py` | `costs.xlsx` (Table 7) |
 | 12 | `losers.py` | `losers.xlsx`, `losers_chart.png` (Table 8, Figures 4, 5) |
 | 13 | `inference.py` | `inference.xlsx` (Table D1) |
-| 14 | `charts_1000_lei.py` | `chart_*.png`, `values_1000_lei.xlsx` (Figures 2, A1) |
+| 14 | `sensitivity.py` | `sensitivity.xlsx` (results without the manual data corrections) |
+| 15 | `loser_characteristics.py` | `loser_characteristics.xlsx` (what kind of stocks the losers are) |
+| 16 | `charts_1000_lei.py` | `chart_*.png`, `values_1000_lei.xlsx` (Figures 2, A1) |
 
 Two files are shared by all scripts:
 
@@ -65,10 +80,10 @@ Two files are shared by all scripts:
 
 ### Cross-market comparison (Table 10, Figures 6–7)
 
-In the `markets/` folder (self-contained):
+In the `markets/` folder (self-contained, run separately):
 
 ```
-python markets_download.py
+python markets_download.py     # once: downloads Romania, Greece, Poland and Germany into markets/data/
 python markets_analysis.py
 ```
 
