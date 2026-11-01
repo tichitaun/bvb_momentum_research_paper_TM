@@ -33,7 +33,9 @@ SCRIPTS = [
     'inference.py',        # Table D1: lag sensitivity, confidence intervals, bootstrap
     'sensitivity.py',      # results with and without the hand-made data corrections
     'loser_characteristics.py',  # liquidity, volatility, beta and sectors of the losers
-    'charts_1000_lei.py',  # Figures 2 and A1: growth of 1,000 lei
+    'charts_1000_lei.py',
+    'loser_characteristics.py',
+    'sensitivity.py'  # Figures 2 and A1: growth of 1,000 lei
 ]
 MODULES = ['common.py', 'portfolios.py']    # shared code imported by the scripts
 

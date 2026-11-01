@@ -30,8 +30,6 @@ From an empty folder containing these scripts:
    (BET-TR is not available on Yahoo Finance.)
 4. **Run the whole analysis**
    ```
-   python sensitivity.py
-   python loser_characteristics.py
    python run_all.py
    ```
    All 8 automatic checks must PASS. The full output is saved to `run_all_log.txt`.
