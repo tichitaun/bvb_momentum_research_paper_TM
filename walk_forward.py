@@ -137,7 +137,7 @@ def run(stocks, index_m, label):
         ax.plot(path.index, path.values, label=name, linestyle=style, color=color)
     log_axis_in_multiples(ax)
     ax.set_ylabel('Value of 1 leu invested (log scale)')
-    ax.set_title(f'Out-of-sample walk-forward test, {label} ({BASE_COST:.1%} cost)')
+    ax.set_title(f'Walk-forward test (exploratory), {label} ({BASE_COST:.1%} cost)')
     ax.legend()
     fig.tight_layout()
     tag = label.split()[0].lower()
