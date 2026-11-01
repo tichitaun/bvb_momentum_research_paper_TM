@@ -12,6 +12,7 @@ Also saves values_1000_lei.xlsx with the month-by-month values.
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from matplotlib.ticker import FixedLocator, FuncFormatter, NullLocator
 
@@ -21,9 +22,31 @@ from portfolios import portfolio, top_n
 from walk_forward import grid_returns, walk_forward, ROLLING_YEARS
 
 START = 1000    # lei
-STYLE = {'BET-TR': dict(color='black', linewidth=2.2, linestyle='--'),
-         'Losers bottom 30%': dict(color='firebrick'),
-         'Equal-weight all stocks': dict(color='grey')}
+# one distinct colour per line, so no two lines can be confused
+STYLE = {'Top 1': dict(color='#1f77b4'),
+         'Top 2': dict(color='#ff7f0e'),
+         'Top 3': dict(color='#2ca02c'),
+         'Winners top 30%': dict(color='#9467bd'),
+         'Equal-weight all stocks': dict(color='grey'),
+         'BET-TR': dict(color='black', linewidth=2.2, linestyle='--'),
+         'Losers bottom 30%': dict(color='firebrick', linestyle=':', linewidth=2)}
+MIN_LABEL_GAP = 0.06    # minimum vertical distance between end labels (log10 units, about 15%)
+
+
+def spread_labels(end_values, log_scale):
+    """Positions for the end-value labels, moved apart so that no two labels overlap."""
+    order = sorted(end_values, key=end_values.get)
+    to_axis = (lambda v: np.log10(v)) if log_scale else (lambda v: v)
+    from_axis = (lambda y: 10 ** y) if log_scale else (lambda y: y)
+    gap = MIN_LABEL_GAP if log_scale else (max(end_values.values()) - min(end_values.values())) * 0.04
+    positions, previous = {}, None
+    for name in order:
+        y = to_axis(end_values[name])
+        if previous is not None and y < previous + gap:
+            y = previous + gap
+        positions[name] = from_axis(y)
+        previous = y
+    return positions
 
 
 def lei(value):
@@ -56,10 +79,13 @@ def draw(lines, title, filename):
     paths = {name: wealth_path(r, start=START) for name, r in lines.items()}
     for log_scale in [True, False]:
         fig, ax = plt.subplots(figsize=(10, 5.5))
+        label_y = spread_labels({name: path.iloc[-1] for name, path in paths.items()}, log_scale)
         for name, path in paths.items():
             ax.plot(path.index, path.values, label=name, **STYLE.get(name, {}))
-            ax.annotate(lei(path.iloc[-1]), xy=(path.index[-1], path.iloc[-1]), xytext=(6, 0),
-                        textcoords='offset points', va='center', fontsize=8)
+            # end value written to the right of the line, moved up if it would overlap another
+            ax.annotate(lei(path.iloc[-1]), xy=(path.index[-1], path.iloc[-1]),
+                        xytext=(path.index[-1] + pd.Timedelta(days=45), label_y[name]), textcoords='data',
+                        va='center', fontsize=8, color=STYLE.get(name, {}).get('color', 'black'))
         if log_scale:
             ax.set_yscale('log')
             ax.yaxis.set_major_locator(FixedLocator([500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]))
@@ -68,7 +94,7 @@ def draw(lines, title, filename):
         ax.axhline(START, color='grey', linewidth=0.8)
         ax.grid(True, axis='y', alpha=0.3)
         ax.margins(x=0.12)                          # room for the end-value labels
-        ax.set_title(title + (' (log scale)' if log_scale else ''))
+        ax.set_title(title + (', log scale' if log_scale else ''))
         ax.set_ylabel('Value of the investment')
         ax.legend(loc='upper left', fontsize=9)
         fig.tight_layout()
